@@ -1,4 +1,4 @@
-module github.com/ml444/cache
+module github.com/ml444/gcache
 
 go 1.19
 
