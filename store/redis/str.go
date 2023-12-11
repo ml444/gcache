@@ -1,10 +1,11 @@
-package gcache
+package redis
 
 import (
 	"context"
-	"github.com/redis/go-redis/v9"
 	"math/rand"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type StrCache struct {

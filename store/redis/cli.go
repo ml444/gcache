@@ -1,12 +1,13 @@
-package gcache
+package redis
 
 import (
 	"context"
 	"errors"
-	log "github.com/ml444/glog"
-	"github.com/redis/go-redis/v9"
 	"os"
 	"strconv"
+
+	log "github.com/ml444/glog"
+	"github.com/redis/go-redis/v9"
 )
 
 const (
