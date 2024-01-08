@@ -1,4 +1,4 @@
-package gcache
+package config
 
 import (
 	"hash/fnv"
@@ -7,18 +7,30 @@ import (
 )
 
 type Config struct {
-	ShardCount int
-	HashFunc   func(key string) uint64
-	LoadFunc   func(key string) ([]byte, error)
-	Shard      struct {
+	GroupAddrMap map[string][]string
+}
+
+type GroupConfig struct {
+	Name              string
+	Addresses         []string
+	ShardCount        int
+	NodeShardSerialNo map[string]int
+	HashFunc          func(key string) uint64
+	LoadFunc          func(key string) ([]byte, error)
+	Shard             struct {
 		MaxSize  int
 		MaxCount int
 		Strategy strategy.IStrategy
 	}
 }
 
-func DefaultConfig() *Config {
-	return &Config{
+func LoadConfig(path string) *GroupConfig {
+	return nil
+}
+
+func DefaultConfig() *GroupConfig {
+	return &GroupConfig{
+		Name:       "",
 		ShardCount: 1024,
 		HashFunc: func(key string) uint64 {
 			hasher := fnv.New64a()

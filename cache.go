@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-type Cacher interface {
+type ICache interface {
 	// Get 根据Key 荻取
 	Get(key string) (value []byte, err error)
 	// GetKeys 根据Key列表获取，如果末命中可能触发加载动作
@@ -36,36 +36,4 @@ type Cacher interface {
 	Clear()
 	Flush() (err error)
 	Close() (err error)
-}
-
-type Cache struct {
-	shardCount uint64
-	shards     []*Shard
-	hashFunc   func(key string) uint64
-	loadFunc   func(key string) ([]byte, error)
-}
-
-func New(cfg *Config) *Cache {
-	c := &Cache{
-		shardCount: uint64(cfg.ShardCount),
-		shards:     make([]*Shard, cfg.ShardCount),
-		hashFunc:   cfg.HashFunc,
-		loadFunc:   cfg.LoadFunc,
-	}
-	for i := 0; i < cfg.ShardCount; i++ {
-		c.shards[i] = newShard(i, cfg.Shard.MaxCount, cfg.Shard.MaxSize, cfg.Shard.Strategy)
-	}
-	return c
-}
-
-func (c *Cache) Set(key string, value []byte) error {
-	hash := c.hashFunc(key)
-	shard := c.shards[hash%c.shardCount]
-	return shard.Set(hash, key, value)
-}
-
-func (c *Cache) Get(key string) ([]byte, error) {
-	hash := c.hashFunc(key)
-	shard := c.shards[hash%c.shardCount]
-	return shard.Get(hash, key)
 }

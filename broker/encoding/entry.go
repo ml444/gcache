@@ -1,4 +1,4 @@
-package gcache
+package encoding
 
 import (
 	"encoding/binary"
@@ -6,10 +6,10 @@ import (
 )
 
 const (
-	itemHashByteLen      = 8
-	itemKeySizeByteLen   = 4
-	itemValueSizeByteLen = 4
-	itemIndexByteLen     = itemHashByteLen + itemKeySizeByteLen + itemValueSizeByteLen
+	ItemHashByteLen      = 8
+	ItemKeySizeByteLen   = 4
+	ItemValueSizeByteLen = 4
+	ItemIndexByteLen     = ItemHashByteLen + ItemKeySizeByteLen + ItemValueSizeByteLen
 )
 
 type Entry struct {
@@ -20,6 +20,16 @@ type Entry struct {
 	DataOffset uint64
 }
 
+func (e *Entry) GetKeyLen() uint32 {
+	return e.keyLen
+}
+func (e *Entry) GetValueLen() uint32 {
+	return e.valueLen
+}
+func (e *Entry) GetDataEnd() uint64 {
+	return e.DataOffset + uint64(e.keyLen+e.valueLen)
+}
+
 type Encode struct {
 	Endian binary.ByteOrder
 }
@@ -27,7 +37,7 @@ type Encode struct {
 func (e *Encode) Marshal(entry *Entry) ([]byte, []byte, error) {
 	keyLen := len(entry.Key)
 	valueLen := len(entry.Value)
-	indexBuf := make([]byte, itemIndexByteLen)
+	indexBuf := make([]byte, ItemIndexByteLen)
 	dataBuf := make([]byte, keyLen+valueLen)
 	b := e.Endian
 	// index bytes
@@ -43,7 +53,7 @@ func (e *Encode) Marshal(entry *Entry) ([]byte, []byte, error) {
 func (e *Encode) MarshalIndex(entry *Entry) ([]byte, error) {
 	keyLen := len(entry.Key)
 	valueLen := len(entry.Value)
-	indexBuf := make([]byte, itemIndexByteLen)
+	indexBuf := make([]byte, ItemIndexByteLen)
 	b := e.Endian
 	// index bytes
 	b.PutUint32(indexBuf[0:], uint32(keyLen))
@@ -63,7 +73,7 @@ func (e *Encode) MarshalKV(entry *Entry) ([]byte, error) {
 }
 
 func (e *Encode) UnmarshalIndex(buf []byte, entry *Entry) error {
-	if len(buf) < itemIndexByteLen {
+	if len(buf) < ItemIndexByteLen {
 		return errors.New("invalid index item length")
 	}
 	//p.dataCorruption = true
